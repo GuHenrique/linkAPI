@@ -1,0 +1,22 @@
+version: "3"
+services:
+  kapi:
+    build:
+      context: ./kapi/
+      dockerfile: Dockerfile
+    environment:
+    - TZ=America/Sao_Paulo
+    volumes:
+      - ./kapi:/app/kapi
+    ports:
+    - "3000:8080"
+    depends_on:
+    - mongo
+  mongo:
+    image: mongo
+    environment:
+    - TZ=America/Sao_Paulo
+    volumes:
+      - ./data:/data/db
+    ports:
+    - "27017:27017"
