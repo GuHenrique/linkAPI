@@ -13,14 +13,32 @@ async function getDeals() {
             method: 'GET',
             url: url
         })
-        .then(function (response) {
+        .then((response) => {
 
             data = response.data
-        });
+        }).catch((error) => {
+
+            Hermodr.error(local, error.response.data)
+            data = error.response.data
+        })
 
     return data;
 }
 
+async function prepareOpportunity (){
+
+    let deals = await getDeals()
+
+    for(var i in deals){
+
+        if(checkDealExistence(deals[i])) continue;
+        
+        //if(deals[i])
+
+    }
+}
+
 module.exports = {
-    getDeals: getDeals
+    getDeals: getDeals,
+    prepareOpportunity:prepareOpportunity
 }
