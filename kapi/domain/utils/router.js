@@ -6,6 +6,7 @@ function router(app) {
     
     
     app = require('../../apps/pipedrive/routes/router').router(app)
+    app = require('../../apps/bling/routes/router').router(app)
     
     return app;
 }

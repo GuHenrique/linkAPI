@@ -5,7 +5,8 @@ let pipedrive = require('../pipedrive')
 
 routes.get('/deals', async (req, res) => {
 
-    let data = await pipedrive.getDeals()
+    let data = await pipedrive.prepareOpportunity()
+    if(data && data.success && data.success == false) res.status(data.errorCode)
     res.json(data)
 });
 

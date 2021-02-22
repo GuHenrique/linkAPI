@@ -161,7 +161,7 @@ routes.get('/logs', async (req, res) => {
 
     const logs = await Log.find(search).sort({
         date: -1
-    }).limit(15);
+    }).limit(50);
 
     return res.json(logs);
 });
