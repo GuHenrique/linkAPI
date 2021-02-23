@@ -5,9 +5,15 @@ let local = 'kapi/apps/pipedrive/pipedrive.js'
 
 let url = `https://${domain}.pipedrive.com/api/v1/deals?api_token=${token}&status=won&sort=won_time%20DESC`
 
-let {createContact, checkContactExistence} = require('../../domain/models/Contact')
-let {checkDealExistence, createDeals }= require('../../domain/models/Deals')
- 
+let {
+    createContact,
+    checkContactExistence
+} = require('../../domain/models/Contact')
+let {
+    checkDealExistence,
+    createDeals
+} = require('../../domain/models/Deals')
+
 
 async function getWonDealsByDate() {
 
@@ -29,34 +35,34 @@ async function getWonDealsByDate() {
     return data;
 }
 
-async function prepareOpportunity() {
+async function getContact(id) {
 
-    let deals = await getWonDealsByDate()
+    let data
 
-    if(deals && deals.success && deals.success == false) return deals
-    
-    for (var i in deals) {
+    await axios({
+            method: 'GET',
+            url: `https://${domain}.pipedrive.com/api/v1/persons?api_token=${token}`
+        })
+        .then((response) => {
 
-        if(new Date().toDateString() != new Date(deals[i]['won_time']).toDateString()) return
-        if (await checkDealExistence(deals[i])) continue
-        
+            let res = response.data.data
+            for (var i in res) {
+                if (id == res[i]['id']) data = res[i]['d4b4baaa3af3b9a26cbd33caab0fda11f29ecc3f']
+            }
+            console.log('teste2')
 
-        
-        let contact = await checkContactExistence(deals[i]['person_id'] || deals[i]['org_id'])
-        if (!contact) contact = await createContact(deals[i]['person_id'], deals[i]['org_id'])
+        }).catch((error) => {
 
-        try {
-            
-            await createDeals(deals[i],contact)
-        } catch (error) {
-            console.log(error)
-        }
-        
-    }
+            Hermodr.error(local, error)
+            data = error
+        })
+
+    return data;
 }
+
 
 
 module.exports = {
     getWonDealsByDate: getWonDealsByDate,
-    prepareOpportunity: prepareOpportunity
+    getContact: getContact
 }

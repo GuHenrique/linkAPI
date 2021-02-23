@@ -1,4 +1,5 @@
 const bling = require('../../apps/bling/bling')
+const { getContact } = require('../../apps/pipedrive/pipedrive')
 let local = 'kapi/domain/models/contact.js'
 
 async function checkContactExistence(contact) {
@@ -20,7 +21,7 @@ async function createContact(person, company) {
     let data
     let personType
 
-    /*if (person) {
+    if (person) {
         data = person
         personType = 'F'
     } else {
@@ -32,16 +33,11 @@ async function createContact(person, company) {
     contact.tipoPessoa = personType
     contact.contribuinte = 9
     contact.codigo - data.value
-*/
+
     try {
-
-        contact = {}
-        contact.nome = 'Guuus'
-        contact.tipoPessoa = 'F'
-        contact.contribuinte = 9
-        contact.codigo = 1112
-
-        await bling.postContact({contact})
+        console.log('teste')
+        contact.cpf_cnpj = await getContact(data.value)
+        return await bling.postContact(contact)
 
     } catch (error) {
         Hermodr.error(local, error)

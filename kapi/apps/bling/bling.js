@@ -7,9 +7,10 @@
 const axios = require('axios')
 let token = process.env.BLING_TOKEN
 let local = 'kapi/apps/bling/bling.js'
-let url = `https://bling.com.br/Api/v2/contatos/json/&apikey=${token}`
+var jsontoxml = require('jsontoxml')
+let url = `https://bling.com.br/Api/v2/contatos/`
+          
 //https://bling.com.br/Api/v2/pedidos/json/&apikey=
-//https://ajuda.bling.com.br/hc/pt-br/articles/360046424094-GET-pedidos
 //https://ajuda.bling.com.br/hc/pt-br/articles/360046378234-GET-contato-identificador-
 
 async function getContacts() {
@@ -18,7 +19,7 @@ async function getContacts() {
 
     await axios({
             method: 'GET',
-            url: url
+            url: url+`/json/&apikey=${token}`
         })
         .then(function (response) {
 
@@ -28,25 +29,64 @@ async function getContacts() {
     return data
 }
 
-async function postContact(contact){
+async function postContact(contato) {
 
+    let data
+    let xml = await jsontoxml({contato})
+    url = `https://bling.com.br/Api/v2/contato/json`
     await axios({
-        method: 'POST',
-        url: url,
-        data: contact
-    })
-    .then(function (response) {
+            method: 'POST',
+            url: url,
+            params: {
+                apikey: token,
+                xml: xml
+              }
+        }).then(function (response) {
 
-        data = response.data.retorno.contatos
-    }).catch((error) => {
-        console.log(error)
-    })
+            if(response.data.retorno && response.data.retorno.erros) {
+                Hermodr.error(local, response.data.retorno.erros)
+                data = false;
+            }else{
+                data = response.data.retorno.contatos
+            }
+        }).catch((error) => {
+            Hermodr.error(local, error)
+        })
 
-return data
+    return data
+
+}
+
+async function postDeal(deal){
+
+    let data
+    let xml = await jsontoxml(deal)
+    url = `https://bling.com.br/Api/v2/pedido/json`
+    await axios({
+            method: 'POST',
+            url: url,
+            params: {
+                apikey: token,
+                xml: xml
+              }
+        }).then(function (response) {
+
+            if(response.data.retorno && response.data.retorno.erros) {
+                Hermodr.error(local, response.data.retorno.erros)
+                data = false;
+            }else{
+                data = response.data.retorno.contatos
+            }
+        }).catch((error) => {
+            Hermodr.error(local, error)
+        })
+
+    return data
 
 }
 
 module.exports = {
     getContacts: getContacts,
-    postContact:postContact
+    postContact: postContact,
+    postDeal: postDeal
 }

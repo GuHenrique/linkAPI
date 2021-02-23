@@ -5,8 +5,7 @@ function router(app) {
     app.use('', HermodrRoutes)
     
     
-    app = require('../../apps/pipedrive/routes/router').router(app)
-    app = require('../../apps/bling/routes/router').router(app)
+    app = require('../models/routerv1').router(app)
     
     return app;
 }

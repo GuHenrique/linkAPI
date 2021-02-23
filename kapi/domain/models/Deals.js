@@ -1,4 +1,7 @@
 const mongoose = require('mongoose')
+const { postDeal } = require('../../apps/bling/bling')
+const { getWonDealsByDate } = require('../../apps/pipedrive/pipedrive')
+const { checkContactExistence, createContact } = require('./Contact')
 let local = 'kapi/domain/models/deal.js'
 
 const dealSchema = new mongoose.Schema({
@@ -68,9 +71,69 @@ async function createDeals(deal, user) {
 
     }
 
+
+    let blingDeal = {
+        pedido: {
+            cliente:{},
+            transporte:{
+                volumes:{
+                    volume:{
+                        servico: 'servico vendido'
+                    }
+                }
+            },
+            itens:{
+                descricao:'Item',
+                qtde: 1,
+                vlr_unit: deal.value
+            },
+            parcelas:{
+                parcela: {
+                    vlr: deal.value
+                }
+            }
+        }
+    }
+    blingDeal.pedido.cliente = user
+
+    try {
+        await postDeal(blingDeal)
+    } catch (error) {
+        Hermodr.error(error)
+    }
+
+
 }
+
+
+async function prepareOpportunity() {
+
+    let deals = await getWonDealsByDate()
+
+    if(deals && deals.success && deals.success == false) return deals
+    
+    for (var i in deals) {
+
+        if(new Date().toDateString() != new Date(deals[i]['won_time']).toDateString()) return
+        if (await checkDealExistence(deals[i])) continue
+        
+        let contact = await checkContactExistence(deals[i]['person_id'] || deals[i]['org_id'])
+        if (!contact) contact = await createContact(deals[i]['person_id'], deals[i]['org_id'])
+        if(contact == false) return
+
+        try {
+            
+            await createDeals(deals[i],contact)
+        } catch (error) {
+            Hermodr.error(error)
+        }
+        
+    }
+}
+
 
 module.exports = {
     checkDealExistence,
-    createDeals
+    createDeals,
+    prepareOpportunity
 }
