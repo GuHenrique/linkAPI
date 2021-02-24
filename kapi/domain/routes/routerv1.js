@@ -9,7 +9,7 @@ routes.get('/dealsImportation', async (req, res) => {
 
 function router(app) {
     
-    app.use('/app/v1', routes)
+    app.use('/kapi/v1', routes)
     
     return app;
 }

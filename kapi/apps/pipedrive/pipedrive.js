@@ -5,16 +5,6 @@ let local = 'kapi/apps/pipedrive/pipedrive.js'
 
 let url = `https://${domain}.pipedrive.com/api/v1/deals?api_token=${token}&status=won&sort=won_time%20DESC`
 
-let {
-    createContact,
-    checkContactExistence
-} = require('../../domain/models/Contact')
-let {
-    checkDealExistence,
-    createDeals
-} = require('../../domain/models/Deals')
-
-
 async function getWonDealsByDate() {
 
     var data;
@@ -35,8 +25,6 @@ async function getWonDealsByDate() {
     return data;
 }
 
-
-
 module.exports = {
-    getWonDealsByDate,
+    getWonDealsByDate
 }

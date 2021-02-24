@@ -1,10 +1,6 @@
 const mongoose = require('mongoose')
-const {
-    postDeal
-} = require('../../apps/bling/bling')
-const {
-    createContact
-} = require('./Contact')
+const { postDeal } = require('../../apps/bling/bling')
+const { createContact } = require('./Contact')
 let local = 'kapi/domain/models/deal.js'
 
 const dealSchema = new mongoose.Schema({
@@ -16,19 +12,19 @@ const dealSchema = new mongoose.Schema({
 Deal = mongoose.model('Deal', dealSchema)
 
 async function checkDealExistence(deal) {
-    
-        let search = {}
-        search.date = new Date().toDateString()
 
-        let currentDay = await Deal.findOne(search)
+    let search = {}
+    search.date = new Date().toDateString()
 
-        if (currentDay && currentDay['deals']) {
-            let allDeals = currentDay['deals']
+    let currentDay = await Deal.findOne(search)
 
-            for (var i in allDeals) {
-                if (deal.id == allDeals[i]['id']) return true
-            }
+    if (currentDay && currentDay['deals']) {
+        let allDeals = currentDay['deals']
+
+        for (var i in allDeals) {
+            if (deal.id == allDeals[i]['id']) return true
         }
+    }
 
     return false
 }
@@ -37,7 +33,7 @@ async function createDeals(deal, user) {
 
     let search = {}
     search.date = new Date().toDateString()
-    
+
     let currentDay = await Deal.findOne(search)
 
     if (currentDay) {
@@ -62,7 +58,7 @@ async function createDeals(deal, user) {
         } catch (error) {
             Hermodr.error(local, error)
         }
-        
+
     } else {
 
         let data = {}
@@ -71,7 +67,6 @@ async function createDeals(deal, user) {
         data.date = new Date().toDateString()
         data.deals = [deal]
 
-
         try {
 
             await Deal.create(data)
@@ -79,9 +74,7 @@ async function createDeals(deal, user) {
         } catch (error) {
             Hermodr.error(local, error)
         }
-
     }
-
 
     let blingDeal = {
         pedido: {
@@ -108,6 +101,7 @@ async function createDeals(deal, user) {
             }
         }
     }
+
     blingDeal.pedido.cliente = user
 
     try {
