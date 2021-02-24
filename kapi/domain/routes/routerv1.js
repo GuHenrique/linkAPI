@@ -1,9 +1,8 @@
 const { Router } = require('express');
-const { prepareOpportunity } = require('./Deals');
+const { prepareOpportunity } = require('../models/Deals');
 const routes = Router();
 
 routes.get('/dealsImportation', async (req, res) => {
-    console.log('Import')
     let data = await prepareOpportunity()
     res.json(data)
 });

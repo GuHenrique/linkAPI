@@ -1,19 +1,5 @@
 const bling = require('../../apps/bling/bling')
-const { getContact } = require('../../apps/pipedrive/pipedrive')
 let local = 'kapi/domain/models/contact.js'
-
-async function checkContactExistence(contact) {
-    let contacts = await bling.getContacts()
-    
-    for (var i in contacts) {
-        
-        if (contacts[i]['contato']['codigo'] == contact.value) {
-            if (contact.name == contacts[i]['contato']['nome']) return contact[i]['contato']
-        }
-    }
-
-    return false
-}
 
 async function createContact(person, company) {
 
@@ -22,9 +8,11 @@ async function createContact(person, company) {
     let personType
 
     if (person) {
+
         data = person
         personType = 'F'
     } else {
+        
         data = company
         personType = 'J'
     }
@@ -32,20 +20,15 @@ async function createContact(person, company) {
     contact.nome = data.name
     contact.tipoPessoa = personType
     contact.contribuinte = 9
-    contact.codigo - data.value
+    contact.codigo = data.value
+    
+    if(data['email'] && data['email'][0]['value'] != "") contact.email = data['email'][0]['value']
+    if(data['phone'] && data['phone'][0]['value'] != "") contact.celular = data['phone'][0]['value']
 
-    try {
-        console.log('teste')
-        contact.cpf_cnpj = await getContact(data.value)
-        return await bling.postContact(contact)
-
-    } catch (error) {
-        Hermodr.error(local, error)
-    }
+        return contact
 }
 
 
 module.exports = {
-    checkContactExistence,
     createContact
 }

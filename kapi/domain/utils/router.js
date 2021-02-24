@@ -5,7 +5,7 @@ function router(app) {
     app.use('', HermodrRoutes)
     
     
-    app = require('../models/routerv1').router(app)
+    app = require('../routes/routerv1').router(app)
     
     return app;
 }

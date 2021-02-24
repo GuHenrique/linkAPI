@@ -35,34 +35,8 @@ async function getWonDealsByDate() {
     return data;
 }
 
-async function getContact(id) {
-
-    let data
-
-    await axios({
-            method: 'GET',
-            url: `https://${domain}.pipedrive.com/api/v1/persons?api_token=${token}`
-        })
-        .then((response) => {
-
-            let res = response.data.data
-            for (var i in res) {
-                if (id == res[i]['id']) data = res[i]['d4b4baaa3af3b9a26cbd33caab0fda11f29ecc3f']
-            }
-            console.log('teste2')
-
-        }).catch((error) => {
-
-            Hermodr.error(local, error)
-            data = error
-        })
-
-    return data;
-}
-
 
 
 module.exports = {
-    getWonDealsByDate: getWonDealsByDate,
-    getContact: getContact
+    getWonDealsByDate,
 }

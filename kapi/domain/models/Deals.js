@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
-const { postDeal } = require('../../apps/bling/bling')
-const { getWonDealsByDate } = require('../../apps/pipedrive/pipedrive')
-const { checkContactExistence, createContact } = require('./Contact')
+const {
+    postDeal
+} = require('../../apps/bling/bling')
+const {
+    createContact
+} = require('./Contact')
 let local = 'kapi/domain/models/deal.js'
 
 const dealSchema = new mongoose.Schema({
@@ -13,27 +16,28 @@ const dealSchema = new mongoose.Schema({
 Deal = mongoose.model('Deal', dealSchema)
 
 async function checkDealExistence(deal) {
+    
+        let search = {}
+        search.date = new Date().toDateString()
 
-    let search = {}
-    search.date = new Date().toDateString()
+        let currentDay = await Deal.findOne(search)
 
-    let currentDay = await Deal.findOne(search)
+        if (currentDay && currentDay['deals']) {
+            let allDeals = currentDay['deals']
 
-    if (currentDay && currentDay['deals']) {
-        let allDeals = currentDay['deals']
-
-        for (var i in allDeals) {
-            if (deal.id == allDeals[i]['id']) return true
+            for (var i in allDeals) {
+                if (deal.id == allDeals[i]['id']) return true
+            }
         }
-    }
-    return false 
+
+    return false
 }
 
 async function createDeals(deal, user) {
 
     let search = {}
     search.date = new Date().toDateString()
-
+    
     let currentDay = await Deal.findOne(search)
 
     if (currentDay) {
@@ -45,14 +49,20 @@ async function createDeals(deal, user) {
             amount += deals[i]['value']
         }
         amount += deal.value
-        await Deal.updateOne(search, {
-            $push: {
-                'deals': deal
-            },
-            $set: {
-                'amount': amount
-            }
-        })
+
+        try {
+            await Deal.updateOne(search, {
+                $push: {
+                    'deals': deal
+                },
+                $set: {
+                    'amount': amount
+                }
+            })
+        } catch (error) {
+            Hermodr.error(local, error)
+        }
+        
     } else {
 
         let data = {}
@@ -65,6 +75,7 @@ async function createDeals(deal, user) {
         try {
 
             await Deal.create(data)
+
         } catch (error) {
             Hermodr.error(local, error)
         }
@@ -74,20 +85,23 @@ async function createDeals(deal, user) {
 
     let blingDeal = {
         pedido: {
-            cliente:{},
-            transporte:{
-                volumes:{
-                    volume:{
+            cliente: {},
+            transporte: {
+                volumes: {
+                    volume: {
                         servico: 'servico vendido'
                     }
                 }
             },
-            itens:{
-                descricao:'Item',
-                qtde: 1,
-                vlr_unit: deal.value
+            itens: {
+                item: {
+                    codigo: 1,
+                    descricao: 'Item',
+                    qtde: 1,
+                    vlr_unit: deal.value
+                }
             },
-            parcelas:{
+            parcelas: {
                 parcela: {
                     vlr: deal.value
                 }
@@ -99,7 +113,7 @@ async function createDeals(deal, user) {
     try {
         await postDeal(blingDeal)
     } catch (error) {
-        Hermodr.error(error)
+        Hermodr.error(local, error)
     }
 
 
@@ -108,26 +122,24 @@ async function createDeals(deal, user) {
 
 async function prepareOpportunity() {
 
-    let deals = await getWonDealsByDate()
+    let pipedrive = require('../../apps/pipedrive/pipedrive')
+    let deals = await pipedrive.getWonDealsByDate()
 
-    if(deals && deals.success && deals.success == false) return deals
-    
+    if (deals && deals.success && deals.success == false) return deals
+
     for (var i in deals) {
 
-        if(new Date().toDateString() != new Date(deals[i]['won_time']).toDateString()) return
+        if (new Date().toDateString() != new Date(deals[i]['won_time']).toDateString()) return
         if (await checkDealExistence(deals[i])) continue
-        
-        let contact = await checkContactExistence(deals[i]['person_id'] || deals[i]['org_id'])
-        if (!contact) contact = await createContact(deals[i]['person_id'], deals[i]['org_id'])
-        if(contact == false) return
+
+        let contact = await createContact(deals[i]['person_id'], deals[i]['org_id'])
 
         try {
-            
-            await createDeals(deals[i],contact)
+
+            await createDeals(deals[i], contact)
         } catch (error) {
             Hermodr.error(error)
         }
-        
     }
 }
 
