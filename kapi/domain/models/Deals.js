@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const { postDeal } = require('../../apps/bling/bling')
 const { createContact } = require('./Contact')
+const {formattedDate} = require('../utils/date')
 let local = 'kapi/domain/models/deal.js'
 
 const dealSchema = new mongoose.Schema({
@@ -14,7 +15,7 @@ Deal = mongoose.model('Deal', dealSchema)
 async function checkDealExistence(deal) {
 
     let search = {}
-    search.date = new Date().toDateString()
+    search.date = formattedDate(new Date())
 
     let currentDay = await Deal.findOne(search)
 
@@ -32,7 +33,7 @@ async function checkDealExistence(deal) {
 async function createDeals(deal, user) {
 
     let search = {}
-    search.date = new Date().toDateString()
+    search.date = formattedDate(new Date())
 
     let currentDay = await Deal.findOne(search)
 
@@ -64,7 +65,7 @@ async function createDeals(deal, user) {
         let data = {}
 
         data.amount = deal.value
-        data.date = new Date().toDateString()
+        data.date = formattedDate(new Date())
         data.deals = [deal]
 
         try {
@@ -123,7 +124,7 @@ async function prepareOpportunity() {
 
     for (var i in deals) {
 
-        if (new Date().toDateString() != new Date(deals[i]['won_time']).toDateString()) return
+        if (formattedDate(new Date()) != formattedDate(new Date(deals[i]['won_time']))) return
         if (await checkDealExistence(deals[i])) continue
 
         let contact = await createContact(deals[i]['person_id'], deals[i]['org_id'])
@@ -138,8 +139,33 @@ async function prepareOpportunity() {
 }
 
 
+async function  getDeals(params){
+    
+    for (var i in params) {
+        
+        if (i != 'date') {
+            console.log('delete')
+            delete params[i]
+        }
+    }
+    
+    try {
+        
+        return  await Deal.find(params)
+    } catch (error) {
+
+        Hermodr.error(local, error)
+        return {
+            error: true,
+            log: error
+        }
+    }
+}
+
+
 module.exports = {
     checkDealExistence,
     createDeals,
-    prepareOpportunity
+    prepareOpportunity,
+    getDeals
 }

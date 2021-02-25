@@ -1,4 +1,4 @@
-/*      Hermodr Logger
+/*      Hermodr Logger - https://github.com/GuHenrique/hermodr-logger
  *  
  *
  *      Console Helpers: 
