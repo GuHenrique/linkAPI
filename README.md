@@ -40,8 +40,10 @@ docker-compose up -d
 
 ## Observações
 
-- O serviço executa é executado automaticamente a cada 1 minuto porém pode ser alterado no arquivo .env (pasta kapi)
-
 - É necessário configurar a os tokens do pipedrive e bling, além do dominio do Pipedrive no arquivo .end (pasta kapi)
+
+- O serviço é executado automaticamente a cada 1 minuto para importar as oportunidades do Pipedrive para o Bling, porém pode ser alterado no arquivo .env (pasta kapi)
+
+- O serviço pode ser executado manualmente através da rota http://localhost:3000/kapi/v1/dealsImportation
 
 - A rota para obter os dados consolidados é a http://localhost:3000/kapi/v1/deals para efetuar uma busca por data especifica passar o parametro date com a data em formato ISO como no exemplo a seguir http://localhost:3000/kapi/v1/deals?date=2021-02-25
